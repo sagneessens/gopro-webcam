@@ -3,7 +3,7 @@ export LC_ALL=C
 
 function check_v4l() {
   local DEVICE="${1}"
-  if [ ! -e "${V4L_DEVICE}" ]; then
+  if [[ ! -e "${V4L_DEVICE}" ]]; then
     echo "ERROR! v4l2loopback device ${V4L_DEVICE} not found"
     echo "Create the device with the following command:"
     echo
@@ -11,7 +11,7 @@ function check_v4l() {
     echo
     exit
   else
-    if [ ${VERBOSE} -eq 1 ]; then
+    if [[ ${VERBOSE} -eq 1 ]]; then
       echo "v4l2loopback device ${V4L_DEVICE} found."
     fi
   fi
@@ -19,7 +19,7 @@ function check_v4l() {
 
 function ffmpeg() {
   local CMD="ffmpeg -threads 1 -i 'udp://'${GOPRO}':8554' -vsync 2 -fflags nobuffer -flags low_delay -probesize 3072 -ar 44100 -vcodec rawvideo -pix_fmt yuv420p -f v4l2 ${V4L_DEVICE}"
-  if [ ${VERBOSE} -eq 1 ]; then
+  if [[ ${VERBOSE} -eq 1 ]]; then
     echo "${CMD}"
   else
     local CMD="${CMD} &>/dev/null"
@@ -29,13 +29,13 @@ function ffmpeg() {
 
 function webcam_api() {
   local PARAMS="${1}"
-  if [ -z "${PARAMS}" ]; then
+  if [[ -z "${PARAMS}" ]]; then
     echo "ERROR! No webcam api parameters provided."
     exit
   fi  
   local URL="${GOPRO}/gp/gpWebcam/${PARAMS}"
   local CMD="curl -s \"${URL}\""
-  if [ ${VERBOSE} -eq 1 ]; then
+  if [[ ${VERBOSE} -eq 1 ]]; then
     echo "${CMD}"
   else
     local CMD="${CMD} &>/dev/null"
@@ -44,27 +44,27 @@ function webcam_api() {
 }
 
 function start() {
-  if [ ${VERBOSE} -eq 1 ]; then
+  if [[ ${VERBOSE} -eq 1 ]]; then
     echo "Checking v4l2loopback device"
   fi
   check_v4l
 
-  if [ ${VERBOSE} -eq 1 ]; then
+  if [[ ${VERBOSE} -eq 1 ]]; then
     echo "Starting GoPro webcam"
   fi
-  if [ -n "${FOV}" ]; then
+  if [[ -n "${FOV}" ]]; then
      webcam_api "SETTINGS?fov=${FOV}"
   fi
   webcam_api "START?res=${RESOLUTION}"
 
-  if [ ${VERBOSE} -eq 1 ]; then
+  if [[ ${VERBOSE} -eq 1 ]]; then
     echo "Starting ffmpeg"
   fi
   ffmpeg
 }
 
 function stop() {
-  if [ ${VERBOSE} -eq 1 ]; then
+  if [[ ${VERBOSE} -eq 1 ]]; then
     echo "Stopping GoPro webcam"
   fi
   webcam_api "STOP"
@@ -90,11 +90,11 @@ VERBOSE=0
 RESOLUTION="720"
 FOV="4"
 
-while [ $# -gt 0 ]; do
+while [[ $# -gt 0 ]]; do
   case "${1}" in
     -f|--fov)
       FOV="${2}"
-      if [ -z "${FOV}" ]; then
+      if [[ -z "${FOV}" ]]; then
         echo "ERROR! No field of view provided."
         exit 1
       fi
@@ -103,7 +103,7 @@ while [ $# -gt 0 ]; do
 
     -r|--resolution)
       RESOLUTION="${2}"
-      if [ -z "${RESOLUTION}" ]; then
+      if [[ -z "${RESOLUTION}" ]]; then
         echo "ERROR! No resolution provided."
         exit 1
       fi
@@ -120,7 +120,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-if [ -z "${GOPRO}" ]; then
+if [[ -z "${INTERFACE}" || -z "${GOPRO}" ]]; then
   echo "ERROR! GoPro not found."
   exit
 fi
@@ -128,8 +128,8 @@ fi
 echo
 echo "Starting GoPro webcam 4 linux"
 echo " - GoPro Network Interface: ${INTERFACE}"
-echo " - GoPro IP Address: ${RESOLUTION}"
-echo " - GoPro Resolution: ${INTERFACE}"
+echo " - GoPro IP Address: ${GOPRO}"
+echo " - GoPro Resolution: ${RESOLUTION}"
 echo " - GoPro Field of View: ${FOV}"
 echo 
 
